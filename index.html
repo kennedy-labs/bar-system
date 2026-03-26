@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Bar System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+
+<h2>Bar Daily Record</h2>
+
+<label>Date:</label><br>
+<input type="date" id="date"><br><br>
+
+<label>Cash:</label><br>
+<input type="number" id="cash"><br><br>
+
+<label>MPesa:</label><br>
+<input type="number" id="mpesa"><br><br>
+
+<button onclick="saveData()">Save</button>
+
+<script>
+function saveData() {
+  const data = {
+    date: document.getElementById("date").value,
+    cash: document.getElementById("cash").value,
+    mpesa: document.getElementById("mpesa").value
+  };
+
+  localStorage.setItem("barData", JSON.stringify(data));
+  alert("Saved!");
+}
+</script>
+
+</body>
+</html>
