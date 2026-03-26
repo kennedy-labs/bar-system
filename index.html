@@ -3,6 +3,12 @@
 <head>
   <title>Bar System</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: Arial; padding: 10px; }
+    table { width: 100%; border-collapse: collapse; }
+    td, th { border: 1px solid #ccc; padding: 5px; text-align: center; }
+    input { width: 60px; }
+  </style>
 </head>
 <body>
 
@@ -11,24 +17,76 @@
 <label>Date:</label><br>
 <input type="date" id="date"><br><br>
 
+<table>
+<tr>
+  <th>Item</th>
+  <th>Price</th>
+  <th>Opening</th>
+  <th>Added</th>
+  <th>Sold</th>
+  <th>Closing</th>
+  <th>Amount</th>
+</tr>
+
+<tr>
+  <td>Beer</td>
+  <td>200</td>
+  <td><input type="number" id="o1"></td>
+  <td><input type="number" id="a1"></td>
+  <td><input type="number" id="s1" oninput="calc()"></td>
+  <td id="c1">0</td>
+  <td id="amt1">0</td>
+</tr>
+
+<tr>
+  <td>Soda</td>
+  <td>100</td>
+  <td><input type="number" id="o2"></td>
+  <td><input type="number" id="a2"></td>
+  <td><input type="number" id="s2" oninput="calc()"></td>
+  <td id="c2">0</td>
+  <td id="amt2">0</td>
+</tr>
+
+</table>
+
+<br>
+
 <label>Cash:</label><br>
 <input type="number" id="cash"><br><br>
 
 <label>MPesa:</label><br>
 <input type="number" id="mpesa"><br><br>
 
-<button onclick="saveData()">Save</button>
+<button onclick="saveData()">Save Day</button>
 
 <script>
-function saveData() {
-  const data = {
-    date: document.getElementById("date").value,
-    cash: document.getElementById("cash").value,
-    mpesa: document.getElementById("mpesa").value
-  };
+function calc() {
+  let o1 = Number(document.getElementById("o1").value) || 0;
+  let a1 = Number(document.getElementById("a1").value) || 0;
+  let s1 = Number(document.getElementById("s1").value) || 0;
 
-  localStorage.setItem("barData", JSON.stringify(data));
-  alert("Saved!");
+  let total1 = o1 + a1;
+  let closing1 = total1 - s1;
+  let amt1 = s1 * 200;
+
+  document.getElementById("c1").innerText = closing1;
+  document.getElementById("amt1").innerText = amt1;
+
+  let o2 = Number(document.getElementById("o2").value) || 0;
+  let a2 = Number(document.getElementById("a2").value) || 0;
+  let s2 = Number(document.getElementById("s2").value) || 0;
+
+  let total2 = o2 + a2;
+  let closing2 = total2 - s2;
+  let amt2 = s2 * 100;
+
+  document.getElementById("c2").innerText = closing2;
+  document.getElementById("amt2").innerText = amt2;
+}
+
+function saveData() {
+  alert("Saved (for now)");
 }
 </script>
 
