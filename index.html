@@ -16,6 +16,7 @@ button { padding: 8px; margin-top: 5px; }
 <script type="module">
   // Import the functions you need from the SDKs you need
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+  import { getFirestore, addDoc, collection } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
   // TODO: Add SDKs for Firebase products that you want to use
   // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -31,6 +32,7 @@ button { padding: 8px; margin-top: 5px; }
 
   // Initialize Firebase
   const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 </script>
 </head>
 <body>
@@ -76,6 +78,7 @@ Cash: <input type="number" id="cash" step="0.01" oninput="finalCalc()"><br><br>
 <h4>Required: <span id="required">0</span></h4>
 <h4>Total Income: <span id="income">0</span></h4>
 <h3 id="result"></h3>
+  <button onclick="saveData()">Save Day</button>
 </div>
 
 <script>
@@ -208,7 +211,22 @@ document.getElementById("result").innerText="SHORT: "+diff;
 document.getElementById("result").innerText="BALANCED";
 }
 }
+async function saveData(){
 
+let data = {
+  worker: document.getElementById("worker").value,
+  date: document.getElementById("date").value,
+  totalSales: document.getElementById("totalSales").innerText,
+  expenses: document.getElementById("totalExpenses").innerText,
+  mpesa: document.getElementById("mpesaTotal").innerText,
+  cash: document.getElementById("cash").value,
+  result: document.getElementById("result").innerText
+};
+
+await addDoc(collection(db, "records"), data);
+
+alert("Saved to database!");
+}
 </script>
 
 </body>
