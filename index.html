@@ -14,26 +14,35 @@ button { padding: 8px; margin-top: 5px; }
 .box { border:1px solid #ccc; padding:10px; margin-top:10px; }
 </style>
 <script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
- import { getFirestore, addDoc, collection, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+import { getFirestore, addDoc, collection, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
-  // Your web app's Firebase configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyDWmrVQNOpYSLJVt3s_ahq5yBkiykn1qtw",
-    authDomain: "bar-system-6b7a3.firebaseapp.com",
-    projectId: "bar-system-6b7a3",
-    storageBucket: "bar-system-6b7a3.firebasestorage.app",
-    messagingSenderId: "823216455050",
-    appId: "1:823216455050:web:491e401ad569da3808dc73"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyDWmrVQNOpYSLJVt3s_ahq5yBkiykn1qtw",
+  authDomain: "bar-system-6b7a3.firebaseapp.com",
+  projectId: "bar-system-6b7a3",
+  storageBucket: "bar-system-6b7a3.firebasestorage.app",
+  messagingSenderId: "823216455050",
+  appId: "1:823216455050:web:491e401ad569da3808dc73"
+};
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  async function loadLastStock(){
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// 🔓 UNLOCK when starting new day
+function unlockInputs(){
+  document.querySelectorAll("input").forEach(i=> i.disabled = false);
+}
+
+// 🔒 LOCK when viewing old record
+function lockInputs(){
+  document.querySelectorAll("input").forEach(i=> i.disabled = true);
+}
+
+// AUTO OPENING
+async function loadLastStock(){
+
+unlockInputs();
 
 const q = query(collection(db, "records"), orderBy("time", "desc"), limit(1));
 const snapshot = await getDocs(q);
@@ -41,7 +50,6 @@ const snapshot = await getDocs(q);
 if(snapshot.empty) return;
 
 let last = snapshot.docs[0].data();
-
 if(!last.stock) return;
 
 last.stock.forEach((item,i)=>{
@@ -53,7 +61,8 @@ calc();
 
 window.onload = loadLastStock;
 
-  async function loadRecords(){
+// LOAD RECORD LIST
+async function loadRecords(){
 
 const snapshot = await getDocs(collection(db, "records"));
 
@@ -66,6 +75,13 @@ html += `<div onclick="viewRecord('${doc.id}')" style="border:1px solid #ccc; ma
 ${d.date} — ${d.worker} — ${d.result}
 </div>`;
 });
+
+document.getElementById("records").innerHTML = html;
+}
+
+window.loadRecords = loadRecords;
+
+// VIEW ONE RECORD
 async function viewRecord(id){
 
 const snapshot = await getDocs(collection(db, "records"));
@@ -90,44 +106,54 @@ document.getElementById("s"+i).value = selected.stock[i]?.sold || 0;
 });
 
 calc();
+lockInputs();
 }
 
 window.viewRecord = viewRecord;
-document.getElementById("records").innerHTML = html;
+
+// SAVE DATA
+async function saveData(){
+
+let worker = document.getElementById("worker").value;
+let date = document.getElementById("date").value;
+
+if(!worker || !date){
+alert("Enter worker name and date");
+return;
 }
 
-window.loadRecords = loadRecords;
-async function saveData(){
+if(!confirm("Save this record?")) return;
 
 let stock = [];
 
 items.forEach((it,i)=>{
-  stock.push({
-    item: it[0],
-    opening: document.getElementById("o"+i).value,
-    added: document.getElementById("a"+i).value,
-    sold: document.getElementById("s"+i).value,
-    closing: document.getElementById("c"+i).innerText
-  });
+stock.push({
+item: it[0],
+opening: document.getElementById("o"+i).value,
+added: document.getElementById("a"+i).value,
+sold: document.getElementById("s"+i).value,
+closing: document.getElementById("c"+i).innerText
+});
 });
 
 let data = {
-  worker: document.getElementById("worker").value,
-  date: document.getElementById("date").value,
-  stock: stock,
-  totalSales: document.getElementById("totalSales").innerText,
-  expenses: document.getElementById("totalExpenses").innerText,
-  mpesa: document.getElementById("mpesaTotal").innerText,
-  cash: document.getElementById("cash").value,
-  result: document.getElementById("result").innerText,
-  time: Date.now()
+worker,
+date,
+stock,
+totalSales: document.getElementById("totalSales").innerText,
+expenses: document.getElementById("totalExpenses").innerText,
+mpesa: document.getElementById("mpesaTotal").innerText,
+cash: document.getElementById("cash").value,
+result: document.getElementById("result").innerText,
+time: Date.now()
 };
 
 await addDoc(collection(db, "records"), data);
 
 alert("Saved to database!");
 }
-  window.saveData = saveData;
+
+window.saveData = saveData;
 </script>
 </head>
 <body>
