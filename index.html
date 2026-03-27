@@ -33,6 +33,23 @@ button { padding: 8px; margin-top: 5px; }
   // Initialize Firebase
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
+async function saveData(){
+
+let data = {
+  worker: document.getElementById("worker").value,
+  date: document.getElementById("date").value,
+  totalSales: document.getElementById("totalSales").innerText,
+  expenses: document.getElementById("totalExpenses").innerText,
+  mpesa: document.getElementById("mpesaTotal").innerText,
+  cash: document.getElementById("cash").value,
+  result: document.getElementById("result").innerText
+};
+
+await addDoc(collection(db, "records"), data);
+
+alert("Saved to database!");
+}
+  window.saveData = saveData;
 </script>
 </head>
 <body>
@@ -211,22 +228,7 @@ document.getElementById("result").innerText="SHORT: "+diff;
 document.getElementById("result").innerText="BALANCED";
 }
 }
-async function saveData(){
 
-let data = {
-  worker: document.getElementById("worker").value,
-  date: document.getElementById("date").value,
-  totalSales: document.getElementById("totalSales").innerText,
-  expenses: document.getElementById("totalExpenses").innerText,
-  mpesa: document.getElementById("mpesaTotal").innerText,
-  cash: document.getElementById("cash").value,
-  result: document.getElementById("result").innerText
-};
-
-await addDoc(collection(db, "records"), data);
-
-alert("Saved to database!");
-}
 </script>
 
 </body>
