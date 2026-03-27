@@ -35,14 +35,28 @@ button { padding: 8px; margin-top: 5px; }
   const db = getFirestore(app);
 async function saveData(){
 
+let stock = [];
+
+items.forEach((it,i)=>{
+  stock.push({
+    item: it[0],
+    opening: document.getElementById("o"+i).value,
+    added: document.getElementById("a"+i).value,
+    sold: document.getElementById("s"+i).value,
+    closing: document.getElementById("c"+i).innerText
+  });
+});
+
 let data = {
   worker: document.getElementById("worker").value,
   date: document.getElementById("date").value,
+  stock: stock,
   totalSales: document.getElementById("totalSales").innerText,
   expenses: document.getElementById("totalExpenses").innerText,
   mpesa: document.getElementById("mpesaTotal").innerText,
   cash: document.getElementById("cash").value,
-  result: document.getElementById("result").innerText
+  result: document.getElementById("result").innerText,
+  time: Date.now()
 };
 
 await addDoc(collection(db, "records"), data);
