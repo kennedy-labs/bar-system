@@ -52,6 +52,25 @@ calc();
 }
 
 window.onload = loadLastStock;
+
+  async function loadRecords(){
+
+const snapshot = await getDocs(collection(db, "records"));
+
+let html = "";
+
+snapshot.forEach(doc=>{
+let d = doc.data();
+
+html += `<div style="border:1px solid #ccc; margin:5px; padding:5px;">
+${d.date} — ${d.worker} — ${d.result}
+</div>`;
+});
+
+document.getElementById("records").innerHTML = html;
+}
+
+window.loadRecords = loadRecords;
 async function saveData(){
 
 let stock = [];
@@ -88,7 +107,10 @@ alert("Saved to database!");
 <body>
 
 <h2>Bar Daily Record</h2>
-
+  
+<button onclick="loadRecords()">View Records</button>
+<div id="records"></div>
+  
 Worker: <input id="worker"><br><br>
 Date: <input type="date" id="date"><br>
 
