@@ -70,7 +70,8 @@ let html = "";
 
 snapshot.forEach(doc=>{
 let d = doc.data();
-
+console.log(d.result);
+  
 let res = (d.result || "").toUpperCase();
 let color = "#fff";
 
