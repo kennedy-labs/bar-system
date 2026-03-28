@@ -71,7 +71,12 @@ let html = "";
 snapshot.forEach(doc=>{
 let d = doc.data();
 
-html += `<div onclick="viewRecord('${doc.id}')" style="border:1px solid #ccc; margin:5px; padding:5px; cursor:pointer;">
+let color = "#fff";
+
+if(d.result?.includes("SHORT")) color = "#ffdddd";
+if(d.result?.includes("TIP")) color = "#ddffdd";
+
+html += `<div onclick="viewRecord('${doc.id}')" style="border:1px solid #ccc; margin:5px; padding:5px; cursor:pointer; background:${color}">
 ${d.date} — ${d.worker} — ${d.result}
 </div>`;
 });
