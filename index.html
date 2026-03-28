@@ -77,10 +77,46 @@ ${d.date} — ${d.worker} — ${d.result}
 });
 
 document.getElementById("records").innerHTML = html;
+  loadDashboard();
+}
+  
+async function loadDashboard(){
+
+const snapshot = await getDocs(collection(db, "records"));
+
+let sales=0, expenses=0, mpesa=0, cash=0, tip=0, short=0;
+
+snapshot.forEach(doc=>{
+let d = doc.data();
+
+sales += Number(d.totalSales)||0;
+expenses += Number(d.expenses)||0;
+mpesa += Number(d.mpesa)||0;
+cash += Number(d.cash)||0;
+
+let res = d.result || "";
+
+if(res.includes("TIP")){
+tip += Number(res.replace("TIP:",""))||0;
 }
 
-window.loadRecords = loadRecords;
+if(res.includes("SHORT")){
+short += Number(res.replace("SHORT:",""))||0;
+}
+});
 
+document.getElementById("dSales").innerText = sales;
+document.getElementById("dExpenses").innerText = expenses;
+document.getElementById("dMpesa").innerText = mpesa;
+document.getElementById("dCash").innerText = cash;
+document.getElementById("dTip").innerText = tip;
+document.getElementById("dShort").innerText = short;
+
+}
+  
+window.loadRecords = loadRecords;
+window.loadDashboard = loadDashboard;
+  
 // VIEW ONE RECORD
 async function viewRecord(id){
 
@@ -155,13 +191,31 @@ alert("Saved to database!");
 
 window.saveData = saveData;
 </script>
+
+  
 </head>
+
+
+  
 <body>
 
 <h2>Bar Daily Record</h2>
   
 <button onclick="loadRecords()">View Records</button>
 <div id="records"></div>
+
+  <div class="box">
+<h3>Owner Dashboard</h3>
+
+<div>Total Sales: <span id="dSales">0</span></div>
+<div>Total Expenses: <span id="dExpenses">0</span></div>
+<div>Total MPesa: <span id="dMpesa">0</span></div>
+<div>Total Cash: <span id="dCash">0</span></div>
+<div>Total Tip: <span id="dTip">0</span></div>
+<div>Total Short: <span id="dShort">0</span></div>
+
+</div>
+
   
 Worker: <input id="worker"><br><br>
 Date: <input type="date" id="date"><br>
