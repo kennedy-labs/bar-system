@@ -80,7 +80,7 @@ document.getElementById("records").innerHTML = html;
   loadDashboard();
 }
   
-async function loadDashboard(){
+async function loadDashboard(mode = 'all'){
 
 const snapshot = await getDocs(collection(db, "records"));
 
@@ -89,6 +89,12 @@ let sales=0, expenses=0, mpesa=0, cash=0, tip=0, short=0;
 snapshot.forEach(doc=>{
 let d = doc.data();
 
+let today = new Date().toISOString().split('T')[0];
+
+if(mode === 'today' && d.date !== today){
+return;
+}
+  
 sales += Number(d.totalSales)||0;
 expenses += Number(d.expenses)||0;
 mpesa += Number(d.mpesa)||0;
@@ -206,7 +212,9 @@ window.saveData = saveData;
 
   <div class="box">
 <h3>Owner Dashboard</h3>
-
+<button onclick="loadDashboard('today')">Today</button>
+<button onclick="loadDashboard('all')">All Time</button>
+    
 <div>Total Sales: <span id="dSales">0</span></div>
 <div>Total Expenses: <span id="dExpenses">0</span></div>
 <div>Total MPesa: <span id="dMpesa">0</span></div>
