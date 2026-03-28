@@ -13,7 +13,6 @@ input { width: 70px; }
 button { padding: 8px; margin-top: 5px; }
 .box { border:1px solid #ccc; padding:10px; margin-top:10px; }
 </style>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
 import { getFirestore, addDoc, collection, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
@@ -30,15 +29,19 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+// 🔓 UNLOCK when starting new day
 function unlockInputs(){
   document.querySelectorAll("input").forEach(i=> i.disabled = false);
 }
 
+// 🔒 LOCK when viewing old record
 function lockInputs(){
   document.querySelectorAll("input").forEach(i=> i.disabled = true);
 }
 
+// AUTO OPENING
 async function loadLastStock(){
+
 unlockInputs();
 
 const q = query(collection(db, "records"), orderBy("time", "desc"), limit(1));
@@ -58,41 +61,7 @@ calc();
 
 window.onload = loadLastStock;
 
-// 🔥 DASHBOARD FUNCTION
-async function loadDashboard(){
-
-const snapshot = await getDocs(collection(db, "records"));
-
-let sales=0, expenses=0, mpesa=0, cash=0, tip=0, short=0;
-
-snapshot.forEach(doc=>{
-let d = doc.data();
-
-sales += Number(d.totalSales)||0;
-expenses += Number(d.expenses)||0;
-mpesa += Number(d.mpesa)||0;
-cash += Number(d.cash)||0;
-
-let res = d.result || "";
-
-if(res.includes("TIP")){
-tip += Number(res.replace("TIP:",""))||0;
-}
-
-if(res.includes("SHORT")){
-short += Number(res.replace("SHORT:",""))||0;
-}
-});
-
-document.getElementById("dSales").innerText = sales;
-document.getElementById("dExpenses").innerText = expenses;
-document.getElementById("dMpesa").innerText = mpesa;
-document.getElementById("dCash").innerText = cash;
-document.getElementById("dTip").innerText = tip;
-document.getElementById("dShort").innerText = short;
-
-}
-
+// LOAD RECORD LIST
 async function loadRecords(){
 
 const snapshot = await getDocs(collection(db, "records"));
@@ -108,13 +77,11 @@ ${d.date} — ${d.worker} — ${d.result}
 });
 
 document.getElementById("records").innerHTML = html;
-
-// 🔥 CALL DASHBOARD
-loadDashboard();
 }
 
 window.loadRecords = loadRecords;
 
+// VIEW ONE RECORD
 async function viewRecord(id){
 
 const snapshot = await getDocs(collection(db, "records"));
@@ -144,6 +111,7 @@ lockInputs();
 
 window.viewRecord = viewRecord;
 
+// SAVE DATA
 async function saveData(){
 
 let worker = document.getElementById("worker").value;
@@ -188,24 +156,12 @@ alert("Saved to database!");
 window.saveData = saveData;
 </script>
 </head>
-
 <body>
 
 <h2>Bar Daily Record</h2>
   
 <button onclick="loadRecords()">View Records</button>
 <div id="records"></div>
-
-<!-- 🔥 DASHBOARD UI -->
-<div class="box">
-<h3>Owner Dashboard</h3>
-<div>Total Sales: <span id="dSales">0</span></div>
-<div>Total Expenses: <span id="dExpenses">0</span></div>
-<div>Total MPesa: <span id="dMpesa">0</span></div>
-<div>Total Cash: <span id="dCash">0</span></div>
-<div>Total Tip: <span id="dTip">0</span></div>
-<div>Total Short: <span id="dShort">0</span></div>
-</div>
   
 Worker: <input id="worker"><br><br>
 Date: <input type="date" id="date"><br>
@@ -246,8 +202,141 @@ Cash: <input type="number" id="cash" step="0.01" oninput="finalCalc()"><br><br>
 <h4>Required: <span id="required">0</span></h4>
 <h4>Total Income: <span id="income">0</span></h4>
 <h3 id="result"></h3>
-<button onclick="saveData()">Save Day</button>
+  <button onclick="saveData()">Save Day</button>
 </div>
 
 <script>
-// (UNCHANGED BELOW — your logic stays intact)
+
+const items = [
+["HUNTERS (400)",400],["FLY HORSE",150],["KIBAO (300)",300],
+["ORIGIN (300)",300],["G.MEAKINS",300],["TRIPPLE ACE",300],
+["NAPS",300],["GILBEYS (550)",550],["BEST GIN (400)",400],
+["BEST VODKA",300],["LEMONADE",70],["PREDATOR",80],
+["VICEROY (550)",550],["CAPRICE",1000],["SMART",170],
+["GUARANA",250],["PINEAPPLE",250],["BLACK ICE",250],
+["GUINNESS CAN",300],["TUSKER CAN",300],["WHITE CAP CAN",300],
+["T CIDER CAN",300],["NOVIDA",60],["MINUTE",100],
+["MIRINDA",50],["MANYATTA",300],["SAFARI",15],
+["PALLMALL",10],["ORIS",15],["MAKALI",450],
+["MURATINA",1200],["KEG",150],["KC (350)",350],
+["KANE (300)",300],["CHROME (300)",300],["COUNTY (300)",300],
+["CAP MORGAN (400)",400],["NEW C MORGAN",500],
+["BEST WHISKEY (450)",450],["ALLSOPS",180],
+["SMIRNOFF",250],["MANGO",300],["KK",300],
+["V&A",400],["PILSNER",250],["FAXE",350],
+["GUINNESS (250)",250],["TUSKER (250)",250],
+["BALOZI",250],["WHITE CAP",250],
+["T CIDER",270],["HUNTERS (450)",450],
+["BLUE ICE",200],["G MEAKING 700ML",900],
+["KC (1000)",1000],["KANE (900)",900],
+["ORIGIN (900)",900],["CHROME (900)",900],
+["COUNTY (900)",900],["C MORGAN (1200)",1200],
+["KIBAO (900)",900],["GILBEYS (1550)",1550],
+["VICEROY (1550)",1550],["BEST GIN (900)",900],
+["BEST WHISKEY (1200)",1200]
+];
+
+const table = document.getElementById("table");
+
+items.forEach((it,i)=>{
+let r = table.insertRow();
+r.innerHTML = `
+<td>${it[0]}</td>
+<td><input type="number" step="0.01" id="o${i}"></td>
+<td><input type="number" step="0.01" id="a${i}" oninput="calc()"></td>
+<td id="t${i}">0</td>
+<td><input type="number" step="0.01" id="s${i}" oninput="calc()"></td>
+<td>${it[1]}</td>
+<td id="c${i}">0</td>
+<td id="amt${i}">0</td>`;
+});
+
+let mpesaArr=[];
+
+function calc(){
+let totalSales=0;
+
+items.forEach((it,i)=>{
+let o=Number(document.getElementById("o"+i).value)||0;
+let a=Number(document.getElementById("a"+i).value)||0;
+let s=Number(document.getElementById("s"+i).value)||0;
+
+let total=o+a;
+let closing=total-s;
+let amt=s*it[1];
+
+document.getElementById("t"+i).innerText=total;
+document.getElementById("c"+i).innerText=closing;
+document.getElementById("amt"+i).innerText=amt;
+
+totalSales+=amt;
+});
+
+document.getElementById("totalSales").innerText=totalSales;
+
+finalCalc();
+}
+
+function addExpense(){
+let div=document.createElement("div");
+div.innerHTML=`<input type="number" step="0.01" oninput="calcExpenses()">`;
+document.getElementById("expenses").appendChild(div);
+}
+
+function calcExpenses(){
+let total=0;
+document.querySelectorAll("#expenses input").forEach(e=>{
+total+=Number(e.value)||0;
+});
+document.getElementById("totalExpenses").innerText=total;
+finalCalc();
+}
+
+function addMpesa(){
+let val=Number(document.getElementById("mpesaInput").value)||0;
+if(val==0)return;
+
+mpesaArr.unshift(val);
+
+let list="";
+mpesaArr.slice(0,20).forEach(v=>{
+list+=`<div>${v}</div>`;
+});
+
+document.getElementById("mpesaList").innerHTML=list;
+
+let total=mpesaArr.reduce((a,b)=>a+b,0);
+document.getElementById("mpesaTotal").innerText=total;
+
+document.getElementById("mpesaInput").value="";
+
+finalCalc();
+}
+
+function finalCalc(){
+let totalSales=Number(document.getElementById("totalSales").innerText)||0;
+let expenses=Number(document.getElementById("totalExpenses").innerText)||0;
+let mpesa=Number(document.getElementById("mpesaTotal").innerText)||0;
+let cash=Number(document.getElementById("cash").value)||0;
+
+let required=totalSales-expenses;
+let income=cash+mpesa;
+
+document.getElementById("required").innerText=required;
+document.getElementById("income").innerText=income;
+
+let diff=income-required;
+
+if(diff>0){
+document.getElementById("result").innerText="TIP: "+diff;
+}else if(diff<0){
+document.getElementById("result").innerText="SHORT: "+diff;
+}else{
+document.getElementById("result").innerText="BALANCED";
+}
+}
+
+</script>
+
+</body>
+</html>
